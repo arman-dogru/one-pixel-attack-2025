@@ -14,7 +14,7 @@ from networks.train_plot import PlotLearning
 class LeNet:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'lenet'
-        self.model_filename     = 'networks/models/lenet.h5'
+        self.model_filename     = 'kaggle/working/networks/models/lenet.h5'
         self.num_classes        = 10
         self.input_shape        = (32, 32, 3)
         self.batch_size         = batch_size

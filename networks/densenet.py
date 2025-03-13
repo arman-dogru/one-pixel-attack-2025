@@ -20,7 +20,7 @@ from networks.train_plot import PlotLearning
 class DenseNet:
     def __init__(self, epochs=250, batch_size=64, load_weights=True):
         self.name               = 'densenet'
-        self.model_filename     = 'networks/models/densenet.h5'
+        self.model_filename     = 'kaggle/working/networks/models/densenet.h5'
         self.growth_rate        = 12 
         self.depth              = 100
         self.compression        = 0.5

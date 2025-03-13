@@ -14,7 +14,7 @@ from networks.train_plot import PlotLearning
 class ResNet:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'resnet'
-        self.model_filename     = 'networks/models/resnet.h5'
+        self.model_filename     = 'kaggle/working/networks/models/resnet.h5'
         self.stack_n            = 5    
         self.num_classes        = 10
         self.img_rows, self.img_cols = 32, 32
