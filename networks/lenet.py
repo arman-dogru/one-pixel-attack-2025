@@ -11,8 +11,6 @@ from tensorflow.keras.regularizers import l2
 from networks.train_plot import PlotLearning
 
 # Code taken from https://github.com/BIGBALLON/cifar-10-cnn
-from tensorflow.keras import optimizers
-
 class LeNet:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'lenet'
@@ -27,41 +25,14 @@ class LeNet:
 
         if load_weights:
             try:
+                # Build the model architecture
                 self._model = self.build_model()
+                # Load the weights from the saved file
                 self._model.load_weights(self.model_filename)
                 print('Successfully loaded weights for', self.name)
             except Exception as e:
                 print('Failed to load weights for', self.name, "due to:", e)
-    
-    def build_model(self):
-        from tensorflow.keras.models import Sequential
-        from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
-        from tensorflow.keras.regularizers import l2
-        
-        model = Sequential()
-        model.add(Conv2D(6, (5, 5), padding='valid', activation='relu',
-                         kernel_initializer='he_normal',
-                         kernel_regularizer=l2(self.weight_decay),
-                         input_shape=self.input_shape))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-        model.add(Conv2D(16, (5, 5), padding='valid', activation='relu',
-                         kernel_initializer='he_normal',
-                         kernel_regularizer=l2(self.weight_decay)))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-        model.add(Flatten())
-        model.add(Dense(120, activation='relu',
-                        kernel_initializer='he_normal',
-                        kernel_regularizer=l2(self.weight_decay)))
-        model.add(Dense(84, activation='relu',
-                        kernel_initializer='he_normal',
-                        kernel_regularizer=l2(self.weight_decay)))
-        model.add(Dense(self.num_classes, activation='softmax',
-                        kernel_initializer='he_normal',
-                        kernel_regularizer=l2(self.weight_decay)))
-        # Use updated parameter name "learning_rate"
-        sgd = optimizers.SGD(learning_rate=0.1, momentum=0.9, nesterov=True)
-        model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
-        return model
+
     
     def count_params(self):
         return self._model.count_params()
@@ -86,7 +57,7 @@ class LeNet:
         model.add(Dense(120, activation = 'relu', kernel_initializer='he_normal', kernel_regularizer=l2(self.weight_decay) ))
         model.add(Dense(84, activation = 'relu', kernel_initializer='he_normal', kernel_regularizer=l2(self.weight_decay) ))
         model.add(Dense(10, activation = 'softmax', kernel_initializer='he_normal', kernel_regularizer=l2(self.weight_decay) ))
-        sgd = optimizers.SGD(lr=.1, momentum=0.9, nesterov=True)
+        sgd = optimizers.SGD(learning_rate=.1, momentum=0.9, nesterov=True)
         model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
         return model
 

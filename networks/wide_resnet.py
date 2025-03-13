@@ -121,7 +121,7 @@ class WideResNet:
         resnet.summary()
         
         # set optimizer
-        sgd = optimizers.SGD(lr=.1, momentum=0.9, nesterov=True)
+        sgd = optimizers.SGD(learning_rate=.1, momentum=0.9, nesterov=True)
         resnet.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
         # set callback

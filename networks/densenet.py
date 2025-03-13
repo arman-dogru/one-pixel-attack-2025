@@ -137,7 +137,7 @@ class DenseNet:
         # plot_model(model, show_shapes=True, to_file='model.png')
 
         # set optimizer
-        sgd = optimizers.SGD(lr=.1, momentum=0.9, nesterov=True)
+        sgd = optimizers.SGD(learning_rate=.1, momentum=0.9, nesterov=True)
         model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
 
         # set callback
