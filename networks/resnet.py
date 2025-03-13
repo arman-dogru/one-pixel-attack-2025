@@ -13,7 +13,7 @@ class ResNet:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'resnet'
         # Change the filename to indicate this file stores only weights.
-        self.model_filename     = 'networks/models/resnet_weights.h5'
+        self.model_filename     = 'networks/models/resnet.h5'
         self.stack_n            = 5    
         self.num_classes        = 10
         self.img_rows, self.img_cols = 32, 32
