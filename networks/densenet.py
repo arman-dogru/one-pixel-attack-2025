@@ -3,7 +3,7 @@ import math
 import numpy as np
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D, Dense, Input, add, Activation, AveragePooling2D, GlobalAveragePooling2D
 from tensorflow.keras.layers import Lambda, concatenate
 from tensorflow.keras.initializers import he_normal

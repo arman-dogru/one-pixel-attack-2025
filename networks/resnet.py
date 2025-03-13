@@ -2,7 +2,7 @@ import tensorflow.keras as keras
 import numpy as np
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D, Dense, Input, add, Activation, GlobalAveragePooling2D
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
 from tensorflow.keras.models import Model, load_model
