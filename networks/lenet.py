@@ -12,9 +12,8 @@ from networks.train_plot import PlotLearning
 
 # Code taken from https://github.com/BIGBALLON/cifar-10-cnn
 class LeNet:
-    def __init__(self, epochs=200, batch_size=128, load_weights=True):
+    def __init__(self, epochs=200, batch_size=128, load_weights=True, model_filename='networks/models/resnet.h5'):
         self.name               = 'lenet'
-        self.model_filename     = 'kaggle/working/networks/models/lenet.h5'
         self.num_classes        = 10
         self.input_shape        = (32, 32, 3)
         self.batch_size         = batch_size
