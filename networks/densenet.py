@@ -1,8 +1,8 @@
-import keras
+import tensorflow.keras as keras
 import math
 import numpy as np
 from keras.datasets import cifar10
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
 from keras.layers.normalization import BatchNormalization
 from keras.layers import Conv2D, Dense, Input, add, Activation, AveragePooling2D, GlobalAveragePooling2D
 from keras.layers import Lambda, concatenate

@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
-import keras
+import tensorflow.keras as keras
 from keras.models import Sequential
 from keras.optimizers import Adam, SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard
-from tensorflow.keras.constraints import MaxNorm as maxnorm
+from keras.constraints import maxnorm
 from keras.models import load_model
 from keras.layers import GlobalAveragePooling2D, Lambda, Conv2D, MaxPooling2D, Dropout, Dense, Flatten, Activation
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from keras.preprocessing.image import ImageDataGenerator
 from keras.datasets import cifar10
 
 from networks.train_plot import PlotLearning
