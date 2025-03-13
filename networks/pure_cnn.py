@@ -5,7 +5,7 @@ import tensorflow.keras as keras
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam, SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard
-from tensorflow.keras.constraints import maxnorm
+from tensorflow.keras.constraints import MaxNorm as maxnorm
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import GlobalAveragePooling2D, Lambda, Conv2D, MaxPooling2D, Dropout, Dense, Flatten, Activation
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
