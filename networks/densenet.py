@@ -7,7 +7,7 @@ from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D, Dense, Input, add, Activation, AveragePooling2D, GlobalAveragePooling2D
 from tensorflow.keras.layers import Lambda, concatenate
 from tensorflow.keras.initializers import he_normal
-from tensorflow.keras.layers.merge import Concatenate
+from tensorflow.keras.layers import Concatenate
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras import optimizers
