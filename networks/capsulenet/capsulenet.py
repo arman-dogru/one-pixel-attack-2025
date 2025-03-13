@@ -16,9 +16,9 @@ Result:
 Author: Xifeng Guo, E-mail: `guoxifeng1990@163.com`, Github: `https://github.com/XifengGuo/CapsNet-Keras`
 """
 
-from keras import layers, models, optimizers
-from keras import backend as K
-from keras.utils import to_categorical
+from tensorflow.keras import layers, models, optimizers
+from tensorflow.keras import backend as K
+from tensorflow.keras.utils import to_categorical
 import numpy as np
 
 from networks.capsulenet.capsulelayers import CapsuleLayer, PrimaryCap, Length, Mask

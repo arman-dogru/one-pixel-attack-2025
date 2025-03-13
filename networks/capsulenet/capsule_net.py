@@ -1,4 +1,4 @@
-from keras.layers import (
+from tensorflow.keras.layers import (
     Input,
     Conv2D,
     Activation,
@@ -7,12 +7,12 @@ from keras.layers import (
     Reshape,
     Dropout
 )
-from keras.layers.merge import add
-from keras.regularizers import l2
-from keras.models import Model
-from keras.layers.normalization import BatchNormalization
-import keras.backend as K
-from keras import optimizers
+from tensorflow.keras.layers import add
+from tensorflow.keras.regularizers import l2
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import BatchNormalization
+import tensorflow.keras.backend as K
+from tensorflow.keras import optimizers
 import numpy as np
 
 from networks.capsulenet.capsule_layers import CapsuleLayer, PrimaryCapsule, Length,Mask
