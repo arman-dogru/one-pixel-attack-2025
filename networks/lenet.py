@@ -1,4 +1,4 @@
-import tensorflow.keras as keras
+import keras
 import numpy as np
 from keras import optimizers
 from keras.datasets import cifar10

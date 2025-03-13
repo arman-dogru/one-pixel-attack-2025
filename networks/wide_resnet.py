@@ -1,14 +1,14 @@
 import tensorflow.keras as keras
 import numpy as np
-from keras.datasets import cifar10
-from keras.preprocessing.image import ImageDataGenerator
-from keras.layers.normalization import BatchNormalization
-from keras.layers import Conv2D, Dense, Input, add, Activation, GlobalAveragePooling2D
-from keras.initializers import he_normal
-from keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
-from keras.models import Model, load_model
-from keras import optimizers
-from keras import regularizers
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.layers.normalization import BatchNormalization
+from tensorflow.keras.layers import Conv2D, Dense, Input, add, Activation, GlobalAveragePooling2D
+from tensorflow.keras.initializers import he_normal
+from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
+from tensorflow.keras.models import Model, load_model
+from tensorflow.keras import optimizers
+from tensorflow.keras import regularizers
 
 from networks.train_plot import PlotLearning
 

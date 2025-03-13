@@ -1,14 +1,14 @@
 import tensorflow.keras as keras
 import numpy as np
-from keras.datasets import cifar10
+from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from keras.models import Sequential, load_model
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D, AveragePooling2D
-from keras.initializers import RandomNormal  
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D, AveragePooling2D
+from tensorflow.keras.initializers import RandomNormal  
 from tensorflow.keras.layers import BatchNormalization
-from keras import optimizers
-from keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
+from tensorflow.keras import optimizers
+from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
 
 from networks.train_plot import PlotLearning
 

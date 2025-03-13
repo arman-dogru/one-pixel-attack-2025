@@ -5,7 +5,7 @@ from tensorflow.keras.utils import to_categorical
 from pandas import read_csv
 
 def load_cifar_10():
-    from keras.datasets import cifar10
+    from tensorflow.keras.datasets import cifar10
     num_classes = 10
     (x_train, y_train), (x_test, y_test) = cifar10.load_data()
     x_train = x_train.astype('float32')
@@ -18,7 +18,7 @@ def load_cifar_10():
     return (x_train,y_train),(x_test,y_test)
 
 def load_cifar_100():
-    from keras.datasets import cifar100
+    from tensorflow.keras.datasets import cifar100
     num_classes = 100
     (x_train, y_train), (x_test, y_test) = cifar100.load_data()
     x_train = x_train.astype('float32')
@@ -77,7 +77,7 @@ def plot_log(filename, show=True):
 
 def data_generator(x,y,batch_size):
     x_train,y_train = x,y
-    from keras.preprocessing.image import ImageDataGenerator
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
     datagen = ImageDataGenerator(
         featurewise_center=False,  # set input mean to 0 over the dataset
         samplewise_center=False,  # set each sample mean to 0
