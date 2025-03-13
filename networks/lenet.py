@@ -33,6 +33,29 @@ class LeNet:
             except Exception as e:
                 print('Failed to load weights for', self.name, "due to:", e)
     
+    def build_model(self):
+        model = Sequential()
+        model.add(Conv2D(6, (5, 5), padding='valid', activation='relu', 
+                         kernel_initializer='he_normal', 
+                         kernel_regularizer=l2(self.weight_decay), 
+                         input_shape=self.input_shape))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+        model.add(Conv2D(16, (5, 5), padding='valid', activation='relu', 
+                         kernel_initializer='he_normal', 
+                         kernel_regularizer=l2(self.weight_decay)))
+        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+        model.add(Flatten())
+        model.add(Dense(120, activation='relu', kernel_initializer='he_normal', 
+                        kernel_regularizer=l2(self.weight_decay)))
+        model.add(Dense(84, activation='relu', kernel_initializer='he_normal', 
+                        kernel_regularizer=l2(self.weight_decay)))
+        model.add(Dense(10, activation='softmax', kernel_initializer='he_normal', 
+                        kernel_regularizer=l2(self.weight_decay)))
+        # Updated: Use learning_rate instead of lr
+        sgd = optimizers.SGD(learning_rate=0.1, momentum=0.9, nesterov=True)
+        model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
+        return model
+    
     def count_params(self):
         return self._model.count_params()
 
