@@ -1,12 +1,12 @@
-import keras
+import tensorflow.keras as keras
 import numpy as np
-from keras import optimizers
-from keras.datasets import cifar10
-from keras.models import Sequential, load_model
-from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
-from keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
-from keras.preprocessing.image import ImageDataGenerator
-from keras.regularizers import l2
+from tensorflow.keras import optimizers
+from tensorflow.keras.datasets import cifar10
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
+from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.regularizers import l2
 
 from networks.train_plot import PlotLearning
 
