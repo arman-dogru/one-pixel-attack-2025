@@ -15,7 +15,6 @@ class ResNet:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'resnet'
         self.model_filename     = 'networks/models/resnet.h5'
-        
         self.stack_n            = 5    
         self.num_classes        = 10
         self.img_rows, self.img_cols = 32, 32
@@ -28,10 +27,19 @@ class ResNet:
 
         if load_weights:
             try:
-                self._model = load_model(self.model_filename)
-                print('Successfully loaded', self.name)
-            except (ImportError, ValueError, OSError):
-                print('Failed to load', self.name)
+                # Import the Input layer if needed
+                from tensorflow.keras.layers import Input
+                # Rebuild the architecture
+                img_input = Input(shape=(self.img_rows, self.img_cols, self.img_channels))
+                output    = self.residual_network(img_input, self.num_classes, self.stack_n)
+                resnet_model = Model(img_input, output)
+                # Load the weights into the rebuilt model
+                resnet_model.load_weights(self.model_filename)
+                self._model = resnet_model
+                print('Successfully loaded weights for', self.name)
+            except Exception as e:
+                print('Failed to load weights for', self.name, "due to:", e)
+
     
     def count_params(self):
         return self._model.count_params()

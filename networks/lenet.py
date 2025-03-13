@@ -16,7 +16,7 @@ class LeNet:
         self.name               = 'lenet'
         self.model_filename     = 'networks/models/lenet.h5'
         self.num_classes        = 10
-        self.input_shape        = 32, 32, 3
+        self.input_shape        = (32, 32, 3)
         self.batch_size         = batch_size
         self.epochs             = epochs
         self.iterations         = 391
@@ -25,10 +25,13 @@ class LeNet:
 
         if load_weights:
             try:
-                self._model = load_model(self.model_filename)
-                print('Successfully loaded', self.name)
-            except (ImportError, ValueError, OSError):
-                print('Failed to load', self.name)
+                # Build the model architecture
+                self._model = self.build_model()
+                # Load the weights from the saved file
+                self._model.load_weights(self.model_filename)
+                print('Successfully loaded weights for', self.name)
+            except Exception as e:
+                print('Failed to load weights for', self.name, "due to:", e)
     
     def count_params(self):
         return self._model.count_params()
