@@ -1,6 +1,6 @@
 jupyter
 keras
-tensorflow-gpu
+tensorflow[and-cuda]
 pandas
 numpy
 matplotlib

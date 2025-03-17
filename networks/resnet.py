@@ -7,12 +7,12 @@ from tensorflow.keras.layers import Conv2D, Dense, Input, add, Activation, Globa
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras import optimizers, regularizers
-
+from keras.saving import load_model, save_model
 from networks.train_plot import PlotLearning
 
 # Code taken from https://github.com/BIGBALLON/cifar-10-cnn
 class ResNet:
-    def __init__(self, epochs=200, batch_size=128, load_weights=True, model_filename='networks/models/resnet.h5'):
+    def __init__(self, epochs=200, batch_size=128, load_weights=True, model_filename='networks/models/resnet.keras'):
         self.name               = 'resnet'
         self.stack_n            = 5    
         self.num_classes        = 10
@@ -23,6 +23,7 @@ class ResNet:
         self.iterations         = 50000 // self.batch_size
         self.weight_decay       = 0.0001
         self.log_filepath       = r'networks/models/resnet/'
+        self.model_filename     = model_filename
 
         if load_weights:
             try:
@@ -31,10 +32,11 @@ class ResNet:
                 # Rebuild the architecture
                 img_input = Input(shape=(self.img_rows, self.img_cols, self.img_channels))
                 output    = self.residual_network(img_input, self.num_classes, self.stack_n)
-                resnet_model = Model(img_input, output)
+                # resnet_model = Model(img_input, output)
                 # Load the weights into the rebuilt model
-                resnet_model.load_weights(self.model_filename)
-                self._model = resnet_model
+                # resnet_model.load_weights(self.model_filename)
+                # self._model = resnet_model
+                self._model = load_model(self.model_filename)
                 print('Successfully loaded weights for', self.name)
             except Exception as e:
                 print('Failed to load weights for', self.name, "due to:", e)
@@ -159,14 +161,15 @@ class ResNet:
         datagen.fit(x_train)
 
         # start training
-        resnet.fit_generator(datagen.flow(x_train, y_train,batch_size=self.batch_size),
+        resnet.fit(datagen.flow(x_train, y_train,batch_size=self.batch_size),
                             steps_per_epoch=self.iterations,
                             epochs=self.epochs,
                             callbacks=cbks,
                             validation_data=(x_test, y_test))
-        resnet.save(self.model_filename)
+        # resnet.save(self.model_filename)
 
         self._model = resnet
+        save_model(self._model, self.model_filename)
         self.param_count = self._model.count_params()
 
     def color_process(self, imgs):
@@ -196,3 +199,7 @@ class ResNet:
         x_train, x_test = self.color_preprocessing(x_train, x_test)
 
         return self._model.evaluate(x_test, y_test, verbose=0)[1]
+
+    @property
+    def model(self):
+        return self._model

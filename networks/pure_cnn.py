@@ -6,10 +6,11 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam, SGD
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard
 from tensorflow.keras.constraints import MaxNorm as maxnorm
-from tensorflow.keras.models import load_model
+# from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import GlobalAveragePooling2D, Lambda, Conv2D, MaxPooling2D, Dropout, Dense, Flatten, Activation
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.datasets import cifar10
+from keras.saving import load_model, save_model
 
 from networks.train_plot import PlotLearning
 
@@ -18,7 +19,7 @@ from networks.train_plot import PlotLearning
 class PureCnn:
     def __init__(self, epochs=350, batch_size=128, load_weights=True):
         self.name               = 'pure_cnn'
-        self.model_filename     = 'networks/models/pure_cnn.h5'
+        self.model_filename     = 'networks/models/pure_cnn.keras'
         self.num_classes        = 10
         self.input_shape        = 32, 32, 3
         self.batch_size         = batch_size
@@ -103,18 +104,19 @@ class PureCnn:
         datagen.fit(x_train)
 
         model.compile(loss='categorical_crossentropy', # Better loss function for neural networks
-                    optimizer=Adam(lr=self.learn_rate), # Adam optimizer with 1.0e-4 learning rate
+                    optimizer=Adam(learning_rate=self.learn_rate), # Adam optimizer with 1.0e-4 learning rate
                     metrics = ['accuracy']) # Metrics to be evaluated by the model
 
-        model.fit_generator(datagen.flow(x_train, y_train, batch_size = self.batch_size),
+        model.fit(datagen.flow(x_train, y_train, batch_size = self.batch_size),
                             epochs = self.epochs,
                             validation_data= (x_test, y_test),
                             callbacks=cbks,
                             verbose=1)
 
-        model.save(self.model_filename)
+        # model.save(self.model_filename)
 
         self._model = model
+        save_model(model, self.model_filename)
 
     def color_process(self, imgs):
         if imgs.ndim < 4:

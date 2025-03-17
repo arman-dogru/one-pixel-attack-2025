@@ -1,5 +1,6 @@
 from tensorflow.keras.utils import to_categorical
 import numpy as np
+from keras.saving import load_model, save_model
 
 from networks.capsulenet.capsule_net import CapsNetv1, train as train_net
 
@@ -7,7 +8,7 @@ from networks.capsulenet.capsule_net import CapsNetv1, train as train_net
 class CapsNet:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'capsnet'
-        self.model_filename     = 'networks/models/capsnet.h5'
+        self.model_filename     = 'networks/models/capsnet.keras'
         self.num_classes        = 10
         self.input_shape        = 32, 32, 3
         self.num_routes         = 3
@@ -20,7 +21,8 @@ class CapsNet:
 
         if load_weights:
             try:
-                self._model.load_weights(self.model_filename)
+                # self._model.load_weights(self.model_filename)
+                self._model = load_model
                 print('Successfully loaded', self.name)
             except (ImportError, ValueError, OSError):
                 print('Failed to load', self.name)
@@ -30,6 +32,7 @@ class CapsNet:
 
     def train(self):
         self._model = train_net()
+        save_model(self._model, self.model_filename)
 
     def color_process(self, imgs):
         if imgs.ndim < 4:

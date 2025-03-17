@@ -71,6 +71,7 @@ class PixelAttacker:
 
         # Format the predict/callback functions for the differential evolution algorithm
         def predict_fn(xs):
+            # TODO adjust this for RQ1
             return self.predict_classes(xs, self.x_test[img_id], target_class, model, target is None)
 
         def callback_fn(x, convergence):

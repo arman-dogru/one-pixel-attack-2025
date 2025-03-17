@@ -9,10 +9,11 @@ from tensorflow.keras.layers import Lambda, concatenate
 from tensorflow.keras.initializers import he_normal
 from tensorflow.keras.layers import Concatenate
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
-from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.models import Model#, load_model
 from tensorflow.keras import optimizers
 from tensorflow.keras import regularizers
 from tensorflow.keras.utils import plot_model
+from keras.saving import load_model, save_model
 
 from networks.train_plot import PlotLearning
 
@@ -20,7 +21,7 @@ from networks.train_plot import PlotLearning
 class DenseNet:
     def __init__(self, epochs=250, batch_size=64, load_weights=True):
         self.name               = 'densenet'
-        self.model_filename     = 'kaggle/working/networks/models/densenet.h5'
+        self.model_filename     = 'kaggle/working/networks/models/densenet.keras'
         self.growth_rate        = 12 
         self.depth              = 100
         self.compression        = 0.5
@@ -154,10 +155,11 @@ class DenseNet:
         datagen.fit(x_train)
 
         # start training
-        model.fit_generator(datagen.flow(x_train, y_train,batch_size=self.batch_size), steps_per_epoch=self.iterations, epochs=self.epochs, callbacks=cbks,validation_data=(x_test, y_test))
-        model.save(self.model_filename)
+        model.fit(datagen.flow(x_train, y_train,batch_size=self.batch_size), steps_per_epoch=self.iterations, epochs=self.epochs, callbacks=cbks,validation_data=(x_test, y_test))
+        # model.save(self.model_filename)
 
         self._model = model
+        save_model(model, self.model_filename)
         self.param_count = self._model.count_params()
 
     def color_process(self, imgs):

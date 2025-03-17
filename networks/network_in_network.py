@@ -2,21 +2,21 @@ import tensorflow.keras as keras
 import numpy as np
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.models import Sequential#, load_model
 from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
 from tensorflow.keras.layers import Conv2D, MaxPooling2D, GlobalAveragePooling2D, AveragePooling2D
 from tensorflow.keras.initializers import RandomNormal  
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras import optimizers
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
-
+from keras.saving import load_model, save_model
 from networks.train_plot import PlotLearning
 
 # Code taken from https://github.com/BIGBALLON/cifar-10-cnn
 class NetworkInNetwork:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'net_in_net'
-        self.model_filename     = 'networks/models/net_in_net.h5'
+        self.model_filename     = 'networks/models/net_in_net.keras'
         self.num_classes        = 10
         self.input_shape        = 32, 32, 3
         self.batch_size         = batch_size
@@ -97,7 +97,7 @@ class NetworkInNetwork:
         model.add(GlobalAveragePooling2D())
         model.add(Activation('softmax'))
         
-        sgd = optimizers.SGD(lr=.1, momentum=0.9, nesterov=True)
+        sgd = optimizers.SGD(learning_rate=.1, momentum=0.9, nesterov=True)
         model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=['accuracy'])
         return model
 
@@ -130,11 +130,12 @@ class NetworkInNetwork:
         datagen.fit(x_train)
 
         # start training
-        model.fit_generator(datagen.flow(x_train, y_train,batch_size=self.batch_size),steps_per_epoch=self.iterations,epochs=self.epochs,callbacks=cbks,validation_data=(x_test, y_test))
+        model.fit(datagen.flow(x_train, y_train,batch_size=self.batch_size),steps_per_epoch=self.iterations,epochs=self.epochs,callbacks=cbks,validation_data=(x_test, y_test))
         
-        model.save(self.model_filename)
+        # model.save(self.model_filename)
 
         self._model = model
+        save_model(model, self.model_filename)
 
     def color_process(self, imgs):
         if imgs.ndim < 4:

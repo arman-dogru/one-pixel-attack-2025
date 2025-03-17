@@ -6,9 +6,10 @@ from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D, Dense, Input, add, Activation, GlobalAveragePooling2D
 from tensorflow.keras.initializers import he_normal
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
-from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.models import Model
 from tensorflow.keras import optimizers
 from tensorflow.keras import regularizers
+from keras.saving import load_model, save_model
 
 from networks.train_plot import PlotLearning
 
@@ -16,7 +17,7 @@ from networks.train_plot import PlotLearning
 class WideResNet:
     def __init__(self, epochs=200, batch_size=128, load_weights=True):
         self.name               = 'wide_resnet'
-        self.model_filename     = 'networks/models/wide_resnet.h5'
+        self.model_filename     = 'networks/models/wide_resnet.keras'
         
         self.depth              = 16
         self.wide               = 8
@@ -140,14 +141,15 @@ class WideResNet:
         datagen.fit(x_train)
 
         # start training
-        resnet.fit_generator(datagen.flow(x_train, y_train,batch_size=self.batch_size),
+        resnet.fit(datagen.flow(x_train, y_train,batch_size=self.batch_size),
                             steps_per_epoch=self.iterations,
                             epochs=self.epochs,
                             callbacks=cbks,
                             validation_data=(x_test, y_test))
-        resnet.save(self.model_filename)
+        # resnet.save(self.model_filename)
 
         self._model = resnet
+        save_model(self._model, self.model_filename)
         self.param_count = self._model.count_params()
 
     def color_process(self, imgs):

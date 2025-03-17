@@ -19,7 +19,7 @@ if __name__ == '__main__':
         'resnet': ResNet,
         'densenet': DenseNet,
         'wide_resnet': WideResNet,
-        'capsnet': CapsNet
+        # 'capsnet': CapsNet
     }
 
     parser = argparse.ArgumentParser(description='Train models on Cifar10')
@@ -27,13 +27,21 @@ if __name__ == '__main__':
 
     parser.add_argument('--epochs', default=None, type=int)
     parser.add_argument('--batch_size', default=None, type=int)
+    parser.add_argument('--bulk', default=False, action='store_true', help='Use bulk training.')
 
     args = parser.parse_args()
     model_name = args.model
-
+    bulk = args.bulk
     args = {k: v for k, v in vars(args).items() if v != None}
     del args['model']
+    del args['bulk']
 
-    model = models[model_name](**args, load_weights=False)
+    if bulk:
+        for k, v in models.items():
+            model = v(**args, load_weights=False)
+            model.train()
+    else:
+        model = models[model_name](**args, load_weights=False)
+        model.train()
 
-    model.train()
+

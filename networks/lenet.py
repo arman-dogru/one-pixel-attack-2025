@@ -7,12 +7,12 @@ from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
 from tensorflow.keras.callbacks import LearningRateScheduler, TensorBoard, ModelCheckpoint
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.regularizers import l2
-
+from keras.saving import load_model, save_model
 from networks.train_plot import PlotLearning
 
 # Code taken from https://github.com/BIGBALLON/cifar-10-cnn
 class LeNet:
-    def __init__(self, epochs=200, batch_size=128, load_weights=True, model_filename='networks/models/resnet.h5'):
+    def __init__(self, epochs=200, batch_size=128, load_weights=True, model_filename='networks/models/lenet.keras'):
         self.name               = 'lenet'
         self.num_classes        = 10
         self.input_shape        = (32, 32, 3)
@@ -21,13 +21,15 @@ class LeNet:
         self.iterations         = 391
         self.weight_decay       = 0.0001
         self.log_filepath       = r'networks/models/lenet/'
+        self.model_filename     = model_filename
 
         if load_weights:
             try:
                 # Build the model architecture
-                self._model = self.build_model()
+                # self._model = self.build_model()
                 # Load the weights from the saved file
-                self._model.load_weights(self.model_filename)
+                # self._model.load_weights(self.model_filename)
+                self._model = load_model(self.model_filename)
                 print('Successfully loaded weights for', self.name)
             except Exception as e:
                 print('Failed to load weights for', self.name, "due to:", e)
@@ -100,15 +102,16 @@ class LeNet:
         datagen.fit(x_train)
 
         # start traing 
-        model.fit_generator(datagen.flow(x_train, y_train,batch_size=self.batch_size),
+        model.fit(datagen.flow(x_train, y_train,batch_size=self.batch_size),
                             steps_per_epoch=self.iterations,
                             epochs=self.epochs,
                             callbacks=cbks,
                             validation_data=(x_test, y_test))
         # save model
-        model.save(self.model_filename)
+        # model.save(self.model_filename)
 
         self._model = model
+        save_model(model, self.model_filename)
 
     def color_process(self, imgs):
         if imgs.ndim < 4:
