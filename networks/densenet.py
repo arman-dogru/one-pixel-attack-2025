@@ -19,9 +19,9 @@ from networks.train_plot import PlotLearning
 
 # Code taken from https://github.com/BIGBALLON/cifar-10-cnn
 class DenseNet:
-    def __init__(self, epochs=250, batch_size=64, load_weights=True):
+    def __init__(self, epochs=250, batch_size=64, load_weights=True, model_filename='networks/models/densenet.keras'):
         self.name               = 'densenet'
-        self.model_filename     = 'kaggle/working/networks/models/densenet.keras'
+        self.model_filename     = model_filename
         self.growth_rate        = 12 
         self.depth              = 100
         self.compression        = 0.5

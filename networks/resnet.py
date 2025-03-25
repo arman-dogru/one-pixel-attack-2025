@@ -166,7 +166,6 @@ class ResNet:
                             epochs=self.epochs,
                             callbacks=cbks,
                             validation_data=(x_test, y_test))
-        # resnet.save(self.model_filename)
 
         self._model = resnet
         save_model(self._model, self.model_filename)

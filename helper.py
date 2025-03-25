@@ -1,5 +1,6 @@
 # CIFAR - 10
 
+from contextlib import contextmanager
 import pickle
 import numpy as np
 from tensorflow.keras.datasets import cifar10
@@ -230,3 +231,17 @@ def download_from_url(url, dst):
 #     imagenet_urls = pd.read_csv('data/imagenet_urls.txt', delimiter='\t', names=['label', 'url'])
 #     imagenet_urls['label'], imagenet_urls['id'] = zip(*imagenet_urls.label.apply(lambda x: x.split('_')))
 #     imagenet_urls.label = imagenet_urls.label.apply(lambda wid: wid_to_id[wid])
+
+# Context Manager to suppress stdout
+@contextmanager
+def suppress_stdout(verbose=False):
+    import os
+    import sys
+    with open(os.devnull, 'w') as devnull:
+        old_stdout = sys.stdout
+        if not verbose:
+            sys.stdout = devnull
+        try:
+            yield
+        finally:
+            sys.stdout = old_stdout
