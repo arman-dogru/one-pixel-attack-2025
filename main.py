@@ -31,7 +31,6 @@ if __name__ == "__main__":
         "resnet": ResNet,
         "densenet": DenseNet,
         "wide_resnet": WideResNet,
-        "capsnet": CapsNet,
     }
 
     login(
@@ -44,7 +43,6 @@ if __name__ == "__main__":
         repo_id="Ethics2025W/base",
         local_dir="networks/models",
     )
-    exit(0)
 
     parser = argparse.ArgumentParser(description="Attack models on Cifar10")
     parser.add_argument(
