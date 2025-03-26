@@ -21,7 +21,6 @@ if __name__ == '__main__':
         'resnet': ResNet,
         'densenet': DenseNet,
         'wide_resnet': WideResNet,
-        # 'capsnet': CapsNet
     }
 
     parser = argparse.ArgumentParser(description='Train models on Cifar10')

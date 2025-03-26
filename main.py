@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     login(
         new_session=False,  # Won’t request token if one is already saved on machine
-        write_permission=True,  # Requires a token with write permission
+        write_permission=False,  # Requires a token with write permission
         token=os.environ["HF_TOKEN_WRITE"],
     )
     os.makedirs("networks/models", exist_ok=True)
