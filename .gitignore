@@ -26,8 +26,6 @@ wheels/
 *.egg
 
 # PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -82,8 +80,8 @@ celerybeat-schedule
 # dotenv
 .env
 
-# virtualenv
-.venv
+# virtualenv (ensure venv is ignored)
+.venv/
 venv/
 ENV/
 
@@ -107,4 +105,7 @@ networks/models
 !networks/models/resnet.h5
 data/*.jpg
 
-/.idea/
+# Ensure virtual environments are not committed to GitHub
+**/venv/
+**/.venv/
+**/ENV/

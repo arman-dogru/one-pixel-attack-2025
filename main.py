@@ -21,6 +21,7 @@ from networks.capsnet import CapsNet
 # Helper functions
 import helper
 from attack import PixelAttacker
+from defense import apply_gaussian_blur, add_gaussian_noise, simclr_augmentation
 
 
 if __name__ == "__main__":
@@ -93,10 +94,9 @@ if __name__ == "__main__":
         help="Print out additional information every iteration.",
     )
     parser.add_argument(
-        "--defence",
-        action="store_true",
-        help="Set this switch to test the defense against the attack.",
-    )
+        "--defense",
+        choices=["blur", "noise", "simclr", "all"], 
+        help="Choose the type of defense")
 
     args = parser.parse_args()
 
@@ -116,6 +116,17 @@ if __name__ == "__main__":
     ]
     models = [model_defs[m](load_weights=True) for m in args.model]
 
+    def apply_selected_defense(image, defense_type):
+        if defense_type == "blur":
+            return apply_gaussian_blur(image)
+        elif defense_type == "noise":
+            return add_gaussian_noise(image)
+        elif defense_type == "simclr":
+            return simclr_augmentation(image)
+        elif defense_type == "all":
+            return simclr_augmentation(add_gaussian_noise(apply_gaussian_blur(image)))
+        return image
+    
     def predict_classes(xs, img, target_class, model, minimize=True):
         """
         This is the function to be minimized.
@@ -127,27 +138,17 @@ if __name__ == "__main__":
         model: keras.model
         minimize: bool
         """
-        # Perturb the image with the given pixel(s) x and get the prediction of the model
-        imgs_perturbed = helper.perturb_image(
-            xs, img
-        )  # Shape: (population_size, 32, 32, 3)
+        if args.defense:
+            img = apply_selected_defense(img, args.defense)
+        
+        imgs_perturbed = helper.perturb_image(xs, img)
         predictions = model.predict(imgs_perturbed)[:, target_class]
-
-        # Change pixel values of perturbed image from original image
-        # L1
-        diff = imgs_perturbed - img  # Shape: (population_size, 32, 32, 3)
-        # L2
-        # Mean of the change in pixel values
+        diff = imgs_perturbed - img
         change = np.mean(np.abs(diff), axis=(1, 2, 3))
-        print(change)
 
-        # This function should always be minimized, so return its complement if needed
-        predictions = (
-            predictions if minimize else 1 - predictions
-        )  # Confidence should go down
-        change = change if minimize else 1 - change  # Change should go down
-        score = predictions + change
-        return score
+        predictions = predictions if minimize else 1 - predictions
+        change = change if minimize else 1 - change
+        return predictions + change
 
     attacker = PixelAttacker(models, test, class_names)
 
