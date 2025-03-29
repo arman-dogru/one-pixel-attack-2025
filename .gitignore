@@ -7,7 +7,7 @@ __pycache__/
 !/results/.gitkeep
 /networks/models/
 /networks/capsulenet/
-/netowrks/results/*
+/networks/results/*
 
 # C extensions
 *.so
