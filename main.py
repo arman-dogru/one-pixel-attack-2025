@@ -96,7 +96,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "--defense",
         choices=["blur", "noise", "simclr", "all"], 
-        help="Choose the type of defense")
+        help="Choose the type of defense",
+    )
+    parser.add_argument(
+        "--upload-results",
+        action="store_true",
+        help="Upload the results to huggingface_hub.",
+    )
+    parser.add_argument(
+        "--minimize-change",
+        action="store_true",
+        help="Minimize the change in the image.",
+    )
 
     args = parser.parse_args()
 
@@ -134,7 +145,7 @@ if __name__ == "__main__":
 
         xs: np.array (population_size, n_pixels * 5)
         img: np.array (32, 32, 3)
-        target_class: int
+        target_clss: int
         model: keras.model
         minimize: bool
         """
@@ -144,11 +155,14 @@ if __name__ == "__main__":
         imgs_perturbed = helper.perturb_image(xs, img)
         predictions = model.predict(imgs_perturbed)[:, target_class]
         diff = imgs_perturbed - img
-        change = np.mean(np.abs(diff), axis=(1, 2, 3))
-
         predictions = predictions if minimize else 1 - predictions
-        change = change if minimize else 1 - change
-        return predictions + change
+
+        if args.minimize_change:
+            change = np.mean(np.abs(diff), axis=(1, 2, 3))
+            change = change if minimize else 1 - change
+            predictions = predictions + change
+
+        return predictions
 
     attacker = PixelAttacker(models, test, class_names)
 
@@ -164,6 +178,7 @@ if __name__ == "__main__":
         popsize=args.popsize,
         verbose=args.verbose,
     )
+    # results = pickle.load(open("./baseline_results.pkl", "rb"))
 
     columns = pd.Index(
         [
@@ -182,16 +197,4 @@ if __name__ == "__main__":
         ]
     )
     results_table = pd.DataFrame(results, columns=columns)
-
-    print(results_table[["model", "pixels", "image", "true", "predicted", "success"]])
-
-    for index, result in results_table[results_table["success"]].iterrows():
-        # Subtract the original image to get the perturbation
-        difference = np.abs(result["attack_image"] - result["original_image"])
-
-        print("Mean: ", difference.mean())
-        print("Max: ", difference.max())
-
-    print("Saving to", args.save)
-    with open(args.save, "wb") as file:
-        pickle.dump(results, file)
+    results_table.to_pickle("results/" + args.save + ".pkl")

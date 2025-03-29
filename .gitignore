@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+/results/
+/networks/models/
+/networks/capsulenet/
+/netowrks/results/*
+
 # C extensions
 *.so
 

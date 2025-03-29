@@ -3,6 +3,7 @@
 from contextlib import contextmanager
 import pickle
 import numpy as np
+from pandas.core.dtypes.dtypes import re
 from tensorflow.keras.datasets import cifar10
 from tensorflow.keras.utils import to_categorical
 from matplotlib import pyplot as plt
@@ -245,3 +246,19 @@ def suppress_stdout(verbose=False):
             yield
         finally:
             sys.stdout = old_stdout
+
+def upload_to_hf(folder_path, repo_id):
+    from huggingface_hub import login
+    from huggingface_hub import HfApi
+    import os
+    login(
+        new_session=True,  # Won’t request token if one is already saved on machine
+        write_permission=True,  # Requires a token with write permission
+        token=os.environ['HF_TOKEN']
+    )
+    api = HfApi()
+    api.upload_folder(
+        folder_path=folder_path,
+        repo_id=repo_id,
+        repo_type="dataset",
+    )

@@ -24,7 +24,7 @@ def simclr_augmentation(image):
     image = tf.image.random_saturation(image, 0.5, 1.5)
     image = tf.image.random_contrast(image, 0.8, 1.2)
     
-    return image.numpy()
+    return image.numpy() 
 
 def apply_defenses(image):
     blurred = apply_gaussian_blur(image)
