@@ -8,7 +8,7 @@ How simple is it to cause a deep neural network to misclassify an image if an at
 
 The following project is a Keras reimplementation and tutorial of ["One pixel attack for fooling deep neural networks"](https://arxiv.org/abs/1710.08864). The official code for the paper can be found [here](https://github.com/Carina02/One-Pixel-Attack).
 
-## How It Works
+## How It Works 
 
 For this attack, we will use the [Cifar10 dataset](https://www.cs.toronto.edu/~kriz/cifar.html). The task of the dataset is to correctly classify a 32x32 pixel image in 1 of 10 categories (e.g., bird, deer, truck). The black-box attack requires only the probability labels (the probability value for each category) that get outputted by the neural network. We generate adversarial images by selecting a pixel and modifying it to a certain color.
 
