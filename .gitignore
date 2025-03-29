@@ -3,7 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-/results/
+/results/*
+!/results/.gitkeep
 /networks/models/
 /networks/capsulenet/
 /netowrks/results/*
