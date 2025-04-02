@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from pandas.core.dtypes.dtypes import re
 import seaborn as sns
 import numpy as np
 import argparse
@@ -14,7 +15,10 @@ if __name__ == "__main__":
     configs = [
         ('results/baseline_results.pkl', 'baseline'),
         ('results/defense_results_all.pkl', 'defense_all'),
-
+        ('results/defense_results_blur.pkl', 'defense_blur'),
+        ('results/defense_results_noise.pkl', 'defense_noise'),
+        ('results/defense_results_simclr.pkl', 'defense_simclr'),
+        ('results/minimize_change_resnet.pkl', 'minimize_change_resnet'),
     ]
     for input, results_name in configs:
         base_dir = f"results/{results_name}"
@@ -52,6 +56,8 @@ if __name__ == "__main__":
                 "success",
             ]
         )
+
+
 
         if args.dev:
             for (model, pixel_count, success), value in data_generator["diff_image"]: #type: ignore

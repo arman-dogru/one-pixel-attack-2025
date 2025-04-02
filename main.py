@@ -96,6 +96,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--defense",
         choices=["blur", "noise", "simclr", "all"], 
+        default=None,
         help="Choose the type of defense",
     )
     parser.add_argument(
