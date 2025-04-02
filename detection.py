@@ -173,7 +173,10 @@ def train_and_evaluate_multiple_models(result_path="baseline_results.pkl", test_
     
     # Split dataset
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42, stratify=y)
-    
+
+        # Visualize a few samples
+    show_sample_images(X, y)
+
     # Define neural network models
     nn_models = {
         "Simple CNN": build_simple_cnn,
@@ -250,6 +253,28 @@ def train_and_evaluate_multiple_models(result_path="baseline_results.pkl", test_
         print(f"Precision: {prec:.4f}")
         print(f"Recall:    {rec:.4f}")
         print(f"F1 Score:  {f1:.4f}")
+
+def show_sample_images(X, y, num_samples=5):
+    clean_indices = np.where(y == 0)[0][:num_samples]
+    adv_indices = np.where(y == 1)[0][:num_samples]
+    
+    plt.figure(figsize=(2 * num_samples, 4))
+    for i, idx in enumerate(clean_indices):
+        plt.subplot(2, num_samples, i + 1)
+        plt.imshow(X[idx])
+        plt.axis("off")
+        plt.title("Clean")
+    
+    for i, idx in enumerate(adv_indices):
+        plt.subplot(2, num_samples, num_samples + i + 1)
+        plt.imshow(X[idx])
+        plt.axis("off")
+        plt.title("Adversarial")
+    
+    plt.suptitle("Clean vs. One-Pixel Attacked Images", fontsize=16)
+    plt.tight_layout()
+    plt.show()
+
 
 if __name__ == "__main__":
     train_and_evaluate_multiple_models()
