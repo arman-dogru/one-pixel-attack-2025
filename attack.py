@@ -3,6 +3,7 @@
 import argparse
 
 import numpy as np
+import random
 import pandas as pd
 from tensorflow.keras.datasets import cifar10
 import pickle
@@ -147,12 +148,16 @@ class PixelAttacker:
         maxiter=75,
         popsize=400,
         verbose=False,
+        selected_imgs=None,
     ):
         results = []
         for model in models:
             model_results = []
             valid_imgs = self.correct_imgs[self.correct_imgs.name == model.name].img
-            img_samples = np.random.choice(valid_imgs, samples)
+            if selected_imgs:
+                img_samples = np.random.choice(valid_imgs, samples)
+            else:
+                img_samples = selected_imgs
 
             for pixel_count in pixels:
                 for i, img in enumerate(img_samples):

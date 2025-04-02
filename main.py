@@ -198,7 +198,6 @@ if __name__ == "__main__":
             popsize=args.popsize,
             verbose=args.verbose,
         )
-    # results = pickle.load(open("./baseline_results.pkl", "rb"))
 
     columns = pd.Index(
         [

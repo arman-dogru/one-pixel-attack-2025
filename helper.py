@@ -1,5 +1,3 @@
-# CIFAR - 10
-
 from contextlib import contextmanager
 import pickle
 import numpy as np
@@ -10,6 +8,8 @@ from matplotlib import pyplot as plt
 import pandas as pd
 import requests
 from tqdm import tqdm
+import os
+import random
 
 
 def perturb_image(xs, img):
@@ -268,4 +268,37 @@ def get_overlapped_images(models, data):
     correct_imgs = [] # 2D Array
     self.x_test, self.y_test = data
     for model in models:
+        continue
+
+def set_seed(seed=42, env=None):
+    """
+    Ensures full reproducibility across TensorFlow operations
+    """
+    import os
+    import random
+    import numpy as np
+    import tensorflow as tf
+    
+    # Set basic Python and NumPy seeds
+    random.seed(seed)
+    np.random.seed(seed)
+    
+    # Set TensorFlow seeds and enable deterministic operations
+    tf.random.set_seed(seed)
+    tf.config.experimental.enable_op_determinism()
+    
+    # Set environment variables for reproducibility
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    os.environ["TF_DETERMINISTIC_OPS"] = "1"
+    os.environ["TF_CUDNN_DETERMINISTIC"] = "1"
+    
+    # Optional: Disable GPU for even more determinism
+    # Uncomment if needed
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+    
+    # Reset environment with seed if provided
+    if env is not None:
+        env.reset(seed=seed)
+    
+    print(f"Reproducibility settings applied with seed: {seed}")
 
