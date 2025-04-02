@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# JetBrains IDE
+.idea/
+
+
 /results/*
 !/results/.gitkeep
 /networks/models/
