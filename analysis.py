@@ -170,13 +170,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     configs = [
-        ("one-pixel-attack-2025/baseline_results.pkl", "baseline_results"),
+        ("/kaggle/working/baseline_results.pkl", "baseline_results"),
         # ('results/baseline.pkl', 'baseline'),
-        ("one-pixel-attack-2025/defense.py", "defense_all"),
-        ("one-pixel-attack-2025/defense_results_blur.pkl", "defense_blur"),
-        ("one-pixel-attack-2025/defense_results_noise.pkl", "defense_noise"),
-        ("one-pixel-attack-2025/defense_results_simclr.pkl", "defense_simclr"),
-        ("one-pixel-attack-2025/minimize_change_resnet.pkl", "minimize_change_resnet"),
+        ("/kaggle/working/defense.py", "defense_all"),
+        ("/kaggle/working/defense_results_blur.pkl", "defense_blur"),
+        ("/kaggle/working/defense_results_noise.pkl", "defense_noise"),
+        ("/kaggle/working/defense_results_simclr.pkl", "defense_simclr"),
+        ("/kaggle/working/minimize_change_resnet.pkl", "minimize_change_resnet"),
         # ('results/minimize_change.pkl', 'minimize_change'),
     ]
 
@@ -272,7 +272,7 @@ if __name__ == "__main__":
         dataframes.append(df)
 
     df = pd.concat(dataframes, ignore_index=True)
-    baseline = pd.read_pickle("one-pixel-attack-2025/baseline_results.pkl")
+    baseline = pd.read_pickle("/kaggle/working/baseline_results.pkl")
     baseline = baseline[baseline["model"] == "resnet"]
     baseline['defense'] = "No Defense"
     df = pd.concat([df, baseline], ignore_index=True)
