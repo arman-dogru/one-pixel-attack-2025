@@ -201,7 +201,7 @@ if __name__ == "__main__":
 
                 # Normalize change to the size of the pixel (0-255)
                 normalized_change = np.array(differences_from_patch) / 255
-                weighted_change = np.mean(normalized_change) * 0.25
+                weighted_change = np.mean(normalized_change) * 0.5
                 change.append(weighted_change)
 
             predictions = predictions + change
@@ -271,5 +271,7 @@ if __name__ == "__main__":
 
     print("Saving to", args.save)
     with open(args.save, "wb") as file:
-        pickle.dump(results, file)
+        pickle.dump(results_table, file)
+
+    exit()
 
