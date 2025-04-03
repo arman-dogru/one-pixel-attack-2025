@@ -266,9 +266,9 @@ def upload_to_hf(folder_path, repo_id):
 
 def get_overlapped_images(models, data):
     correct_imgs = [] # 2D Array
-    self.x_test, self.y_test = data
+    x_test, y_test = data
     for model in models:
-        continue
+        pass
 
 def set_seed(seed=42, env=None):
     """

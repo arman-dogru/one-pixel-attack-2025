@@ -154,7 +154,7 @@ class PixelAttacker:
         for model in models:
             model_results = []
             valid_imgs = self.correct_imgs[self.correct_imgs.name == model.name].img
-            if selected_imgs:
+            if not selected_imgs:
                 img_samples = np.random.choice(valid_imgs, samples)
             else:
                 img_samples = selected_imgs

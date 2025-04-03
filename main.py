@@ -26,7 +26,7 @@ from defense import apply_gaussian_blur, add_gaussian_noise, simclr_augmentation
 
 if __name__ == "__main__":
     model_defs = {
-        "lenet": LeNet,
+        #"lenet": LeNet,
         "pure_cnn": PureCnn,
         "net_in_net": NetworkInNetwork,
         "resnet": ResNet,
@@ -108,6 +108,16 @@ if __name__ == "__main__":
         action="store_true",
         help="Minimize the change in the image.",
     )
+    parser.add_argument(
+        "--deterministic-comparison",
+        action="store_true",
+        help="Compare the attacks on the same images for different models.",
+    )
+    parser.add_argument(
+        "--minimize-local-change",
+        action="store_true",
+        help="Minimize the change in the local area of the image.",
+    )
 
     args = parser.parse_args()
 
@@ -141,7 +151,6 @@ if __name__ == "__main__":
     def predict_classes(xs, img, target_class, model, minimize=True):
         """
         This is the function to be minimized.
-        RQ3 - TODO This function should be adjusted to minimize the change in the image
 
         xs: np.array (population_size, n_pixels * 5)
         img: np.array (32, 32, 3)
@@ -149,6 +158,7 @@ if __name__ == "__main__":
         model: keras.model
         minimize: bool
         """
+        assert minimize
         if args.defense:
             img = apply_selected_defense(img, args.defense)
         
@@ -158,8 +168,42 @@ if __name__ == "__main__":
         predictions = predictions if minimize else 1 - predictions
 
         if args.minimize_change:
-            change = np.mean(np.abs(diff), axis=(1, 2, 3))
+            change = np.linalg.norm(imgs_perturbed - img)
             change = change if minimize else 1 - change
+            predictions = predictions + change
+        elif args.minimize_local_change:
+            # Get surrounding pixels (5x5) for each pixel
+            patch_size = 3 # Size of the patch to be used  nxn, can also be 5x5 or 7x7
+            assert diff.sum() > 0
+            minus = patch_size // 2
+            plus = patch_size - minus
+            print("diff shape", diff.shape)
+            change = []
+            for attack_image in imgs_perturbed:
+                diff = np.abs(attack_image - img)
+                diff = np.pad(diff, ((minus,minus), (minus,minus), (0,0)), mode='constant')  # Handle borders [9]
+                y_list, x_list = np.array(np.argwhere(diff)[:,:2][::3]).T
+        
+                differences_from_patch = []
+                for y, x in zip(y_list, x_list):
+                    patch = np.array(attack_image[y-minus:y+plus, x-minus:x+plus, :])
+                    if patch.shape != (patch_size, patch_size, 3):
+                        continue
+                    mask = np.ones_like(patch, dtype=bool)
+                    mask[minus, minus, :] = False
+                    masked_patch = np.where(mask, patch, np.nan)
+                    avg = np.nanmean(masked_patch, axis=(0, 1))
+                    poisoned_pixel_value = patch[minus, minus, :]
+        
+                    # Euclidean dist from original
+                    dist = np.linalg.norm(avg - poisoned_pixel_value)
+                    differences_from_patch.append(dist)
+
+                # Normalize change to the size of the pixel (0-255)
+                normalized_change = np.array(differences_from_patch) / 255
+                weighted_change = np.mean(normalized_change) * 0.25
+                change.append(weighted_change)
+
             predictions = predictions + change
 
         return predictions
@@ -168,17 +212,36 @@ if __name__ == "__main__":
 
     print("Starting attack")
 
-    results = attacker.attack_all(
-        models=models,
-        fitness_function=predict_classes,
-        samples=args.samples,
-        pixels=args.pixels,
-        targeted=args.targeted,
-        maxiter=args.maxiter,
-        popsize=args.popsize,
-        verbose=args.verbose,
-    )
-    # results = pickle.load(open("./baseline_results.pkl", "rb"))
+
+    if args.deterministic_comparison:
+        images = [1, 2, 3, 4, 5]
+        results = []
+        for img_id in images:
+            for model in models:
+                print(f"Model: {model.name}, Image: {img_id}")
+                results.append(
+                    attacker.attack(
+                        model=model,
+                        fitness_function=predict_classes,
+                        img_id=img_id,
+                        maxiter=args.maxiter,
+                        popsize=args.popsize,
+                        verbose=args.verbose,
+                    )
+                )
+        results = np.array(results)
+
+    else:
+        results = attacker.attack_all(
+            models=models,
+            fitness_function=predict_classes,
+            samples=args.samples,
+            pixels=args.pixels,
+            targeted=args.targeted,
+            maxiter=args.maxiter,
+            popsize=args.popsize,
+            verbose=args.verbose,
+        )
 
     columns = pd.Index(
         [
