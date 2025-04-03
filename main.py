@@ -95,8 +95,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--defense",
-        choices=["blur", "noise", "simclr", "all"],
-        default=None,
+        choices=["blur", "noise", "simclr", "all"], 
         help="Choose the type of defense",
     )
     parser.add_argument(
@@ -138,7 +137,7 @@ if __name__ == "__main__":
         elif defense_type == "all":
             return simclr_augmentation(add_gaussian_noise(apply_gaussian_blur(image)))
         return image
-
+    
     def predict_classes(xs, img, target_class, model, minimize=True):
         """
         This is the function to be minimized.
@@ -152,7 +151,7 @@ if __name__ == "__main__":
         """
         if args.defense:
             img = apply_selected_defense(img, args.defense)
-
+        
         imgs_perturbed = helper.perturb_image(xs, img)
         predictions = model.predict(imgs_perturbed)[:, target_class]
         diff = imgs_perturbed - img
@@ -169,35 +168,17 @@ if __name__ == "__main__":
 
     print("Starting attack")
 
-    if args.deterministic_comparison:
-        images = [1, 2, 3, 4, 5]
-        results = []
-        for img_id in images:
-            for model in models:
-                results.append(
-                    attacker.attack(
-                        model=model,
-                        fitness_function=predict_classes,
-                        img_id=img_id,
-                        pixels=args.pixels,
-                        targeted=args.targeted,
-                        maxiter=args.maxiter,
-                        popsize=args.popsize,
-                        verbose=args.verbose,
-                    )
-                )
-
-    else:
-        results = attacker.attack_all(
-            models=models,
-            fitness_function=predict_classes,
-            samples=args.samples,
-            pixels=args.pixels,
-            targeted=args.targeted,
-            maxiter=args.maxiter,
-            popsize=args.popsize,
-            verbose=args.verbose,
-        )
+    results = attacker.attack_all(
+        models=models,
+        fitness_function=predict_classes,
+        samples=args.samples,
+        pixels=args.pixels,
+        targeted=args.targeted,
+        maxiter=args.maxiter,
+        popsize=args.popsize,
+        verbose=args.verbose,
+    )
+    # results = pickle.load(open("./baseline_results.pkl", "rb"))
 
     columns = pd.Index(
         [
@@ -232,63 +213,75 @@ if __name__ == "__main__":
     # ======================= RQ4 Analysis: One-Pixel Attack Consistency Across Groups =======================
 
     # Group results by model and class (true label) to analyze success rate
-    grouped_results = results_table.groupby(["model", "true"])
+    grouped_results = results_table.groupby(['model', 'true'])
     # Calculate success rate for each combination of model and class
-    success_rate_by_group = grouped_results["success"].mean().reset_index()
+    success_rate_by_group = grouped_results['success'].mean().reset_index()
     # Print the success rates for each group
     print("\nSuccess rate by model and class:")
     print(success_rate_by_group)
 
     # Further analysis: Check if specific classes are more vulnerable across all models
-    class_success_rate = results_table.groupby("true")["success"].mean().reset_index()
+    class_success_rate = results_table.groupby('true')['success'].mean().reset_index()
     # Print the success rate per class (across all models)
     print("\nSuccess rate by class (across all models):")
     print(class_success_rate)
 
     # ======================= Bias Investigation: Misclassified Images by Class =======================
-    misclassified_by_class = results_table[results_table["success"] == False].groupby("true").size()
+    misclassified_by_class = results_table[results_table['success'] == False].groupby('true').size()
     # Print out the misclassified count per class
     print("\nMisclassified images by class:")
     print(misclassified_by_class)
 
-    # Analyze the impact of different pixel modifications across classes
-    pixel_success_rate = results_table.groupby("pixels")["success"].mean().reset_index()
+    # Plot Misclassified Images by Class (Bar Plot)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=misclassified_by_class.index, y=misclassified_by_class.values, palette="viridis")
+    plt.title('Misclassified Images by Class')
+    plt.ylabel('Number of Misclassified Images')
+    plt.xlabel('Class')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+    # ======================= Analyze the Impact of Different Pixel Modifications Across Classes =======================
+    pixel_success_rate = results_table.groupby('pixels')['success'].mean().reset_index()
     # Print the success rate for different pixel perturbations
     print("\nSuccess rate by number of pixels perturbed:")
     print(pixel_success_rate)
+
+    # Plot success rate by number of pixels perturbed (Bar Plot)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=pixel_success_rate, x='pixels', y='success')
+    plt.title('Success Rate of One-Pixel Attacks by Number of Pixels Perturbed')
+    plt.ylabel('Success Rate')
+    plt.xlabel('Number of Pixels Perturbed')
+    plt.tight_layout()
+    plt.show()
+
 
     import seaborn as sns
     import matplotlib.pyplot as plt
 
     # Plot success rate by model and class (Bar Plot)
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=success_rate_by_group, x="model", y="success", hue="true")
-    plt.title("Success Rate of One-Pixel Attacks by Model and Class")
-    plt.ylabel("Success Rate")
-    plt.xlabel("Model")
+    sns.barplot(data=success_rate_by_group, x='model', y='success', hue='true')
+    plt.title('Success Rate of One-Pixel Attacks by Model and Class')
+    plt.ylabel('Success Rate')
+    plt.xlabel('Model')
     plt.xticks(rotation=45)
-    plt.legend(title="True Label", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.legend(title="True Label", bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
     plt.show()
 
     # Plot success rate by class (Bar Plot)
     plt.figure(figsize=(10, 6))
-    sns.barplot(data=class_success_rate, x="true", y="success")
-    plt.title("Success Rate of One-Pixel Attacks by Class")
-    plt.ylabel("Success Rate")
-    plt.xlabel("Class")
+    sns.barplot(data=class_success_rate, x='true', y='success')
+    plt.title('Success Rate of One-Pixel Attacks by Class')
+    plt.ylabel('Success Rate')
+    plt.xlabel('Class')
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
 
-    # Plot success rate by number of pixels perturbed (Bar Plot)
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=pixel_success_rate, x="pixels", y="success")
-    plt.title("Success Rate of One-Pixel Attacks by Number of Pixels Perturbed")
-    plt.ylabel("Success Rate")
-    plt.xlabel("Number of Pixels Perturbed")
-    plt.tight_layout()
-    plt.show()
 
     # Save the success rate by group and per class to CSV for future reference
     success_rate_by_group.to_csv("success_rate_by_group.csv", index=False)
@@ -298,7 +291,7 @@ if __name__ == "__main__":
 
     # --- Chi-Squared Test for Independence ---
     # Create a contingency table for 'model' vs 'success'
-    contingency_table = pd.crosstab(results_table["model"], results_table["success"])
+    contingency_table = pd.crosstab(results_table['model'], results_table['success'])
     chi2, p_value, dof, expected = stats.chi2_contingency(contingency_table)
     print("\nChi-Squared Test for independence between model and attack success:")
     print(f"Chi2 statistic: {chi2}, p-value: {p_value}, degrees of freedom: {dof}")
@@ -310,7 +303,7 @@ if __name__ == "__main__":
     print(f"F-statistic: {f_stat}, p-value: {anova_p}")
 
     # --- Heatmap Visualization of Success Rate by Model and Class ---
-    heatmap_data = success_rate_by_group.pivot(index="model", columns="true", values="success")
+    heatmap_data = success_rate_by_group.pivot(index='model', columns='true', values='success')
     plt.figure(figsize=(10, 6))
     sns.heatmap(heatmap_data, annot=True, cmap="viridis", cbar=True)
     plt.title("Heatmap: Success Rate of One-Pixel Attacks by Model and Class")
@@ -324,14 +317,14 @@ if __name__ == "__main__":
         fig, ax = plt.subplots(1, 2, figsize=(10, 5))
         ax[0].imshow(original_image)
         ax[0].set_title(f"Original: {class_names[true_label]}")
-        ax[0].axis("off")
+        ax[0].axis('off')
         ax[1].imshow(perturbed_image)
         ax[1].set_title(f"Perturbed: {class_names[true_label]}")
-        ax[1].axis("off")
+        ax[1].axis('off')
         plt.tight_layout()
         plt.show()
 
     # Display side-by-side comparisons for a few successful attacks
-    sample_successes = results_table[results_table["success"] == True].sample(n=5, random_state=42)
+    sample_successes = results_table[results_table['success'] == True].sample(n=5, random_state=42)
     for index, row in sample_successes.iterrows():
         visualize_image_comparison(row["original_image"], row["attack_image"], row["true"])
