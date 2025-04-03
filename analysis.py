@@ -72,10 +72,15 @@ def rqs(results_table: pd.DataFrame, base_dir: str):
     # Plot success rate by class (Bar Plot)
     plt.figure(figsize=(10, 6))
     sns.barplot(data=class_success_rate, x='true', y='success')
+
     plt.title('Success Rate of One-Pixel Attacks by Class')
     plt.ylabel('Success Rate')
     plt.xlabel('Class')
     plt.xticks(rotation=45)
+
+    # Ensure the same scale for y-axis across different plots
+    plt.ylim(0, 1)  # Assuming success rate is between 0 and 1
+
     plt.tight_layout()
     plt.savefig(f"{base_dir}/success_rate_by_class.png", dpi=400)
 
