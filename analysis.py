@@ -1,14 +1,139 @@
-import pathlib
 import shutil
+from scipy import stats
 from typing import List, Tuple
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib.pyplot import title
-from pandas.core.dtypes.dtypes import re
 import seaborn as sns
 import numpy as np
 import argparse
 import os
+
+from main import CLASS_NAMES
+
+
+def rqs(results_table: pd.DataFrame, base_dir: str):
+    # ======================= RQ4 Analysis: One-Pixel Attack Consistency Across Groups =======================
+    # Group results by model and class (true label) to analyze success rate
+    grouped_results = results_table.groupby(['model', 'true'])
+    # Calculate success rate for each combination of model and class
+    success_rate_by_group = grouped_results['success'].mean().reset_index()
+    # Print the success rates for each group
+    print("\nSuccess rate by model and class:")
+    print(success_rate_by_group)
+
+    # Further analysis: Check if specific classes are more vulnerable across all models
+    class_success_rate = results_table.groupby('true')['success'].mean().reset_index()
+    # Print the success rate per class (across all models)
+    print("\nSuccess rate by class (across all models):")
+    print(class_success_rate)
+
+    # ======================= Bias Investigation: Misclassified Images by Class =======================
+    misclassified_by_class = results_table[results_table['success'] == False].groupby('true').size()
+    # Print out the misclassified count per class
+    print("\nMisclassified images by class:")
+    print(misclassified_by_class)
+
+    # Plot Misclassified Images by Class (Bar Plot)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=misclassified_by_class.index, y=misclassified_by_class.values, palette="viridis")
+    plt.title('Misclassified Images by Class')
+    plt.ylabel('Number of Misclassified Images')
+    plt.xlabel('Class')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(f"{base_dir}/misclassified_by_class.png", dpi=400)
+
+    # ======================= Analyze the Impact of Different Pixel Modifications Across Classes =======================
+    pixel_success_rate = results_table.groupby('pixels')['success'].mean().reset_index()
+    # Print the success rate for different pixel perturbations
+    print("\nSuccess rate by number of pixels perturbed:")
+    print(pixel_success_rate)
+
+    # Plot success rate by number of pixels perturbed (Bar Plot)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=pixel_success_rate, x='pixels', y='success')
+    plt.title('Success Rate of One-Pixel Attacks by Number of Pixels Perturbed')
+    plt.ylabel('Success Rate')
+    plt.xlabel('Number of Pixels Perturbed')
+    plt.tight_layout()
+    plt.savefig(f"{base_dir}/success_rate_by_pixels.png", dpi=400)
+
+    # Plot success rate by model and class (Bar Plot)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=success_rate_by_group, x='model', y='success', hue='true')
+    plt.title('Success Rate of One-Pixel Attacks by Model and Class')
+    plt.ylabel('Success Rate')
+    plt.xlabel('Model')
+    plt.xticks(rotation=45)
+    plt.legend(title="True Label", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(f"{base_dir}/success_rate_by_model_and_class.png", dpi=400)
+
+    # Plot success rate by class (Bar Plot)
+    plt.figure(figsize=(10, 6))
+    sns.barplot(data=class_success_rate, x='true', y='success')
+    plt.title('Success Rate of One-Pixel Attacks by Class')
+    plt.ylabel('Success Rate')
+    plt.xlabel('Class')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(f"{base_dir}/success_rate_by_class.png", dpi=400)
+
+    # Save the success rate by group and per class to CSV for future reference
+    success_rate_by_group.to_csv(f"{base_dir}/success_rate_by_group.csv", index=False)
+    class_success_rate.to_csv(f"{base_dir}/class_success_rate.csv", index=False)
+
+
+    # --- Chi-Squared Test for Independence ---
+    # Create a contingency table for 'model' vs 'success'
+    contingency_table = pd.crosstab(results_table['model'], results_table['success'])
+    chi2, p_value, dof, expected = stats.chi2_contingency(contingency_table)
+    print("\nChi-Squared Test for independence between model and attack success:")
+    print(f"Chi2 statistic: {chi2}, p-value: {p_value}, degrees of freedom: {dof}")
+
+    # --- One-Way ANOVA across classes ---
+    groups = [group["success"].values for name, group in results_table.groupby("true")]
+    f_stat, anova_p = stats.f_oneway(*groups)
+    print("\nOne-Way ANOVA across classes for attack success rates:")
+    print(f"F-statistic: {f_stat}, p-value: {anova_p}")
+
+    # --- Heatmap Visualization of Success Rate by Model and Class ---
+    heatmap_data = success_rate_by_group.pivot(index='model', columns='true', values='success')
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(heatmap_data, annot=True, cmap="viridis", cbar=True)
+    plt.title("Heatmap: Success Rate of One-Pixel Attacks by Model and Class")
+    plt.xlabel("True Class")
+    plt.ylabel("Model")
+    plt.tight_layout()
+    plt.savefig(f"{base_dir}/success_rate_heatmap.png", dpi=400)
+
+
+    # Function to visualize original and perturbed images side by side
+    def visualize_image_comparison(original_image, perturbed_image, true_label):
+        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+        ax[0].imshow(original_image)
+        ax[0].set_title(f"Original: {CLASS_NAMES[true_label]}")
+        ax[0].axis('off')
+        ax[1].imshow(perturbed_image)
+        ax[1].set_title(f"Perturbed: {CLASS_NAMES[true_label]}")
+        ax[1].axis('off')
+        plt.tight_layout()
+
+
+    # Display side-by-side comparisons for a few successful attacks
+    sample_successes = results_table[results_table['success'] == True].sample(n=5, random_state=42)
+    for index, row in sample_successes.iterrows():
+        visualize_image_comparison(row["original_image"], row["attack_image"], row["true"])
+        os.makedirs(f"{base_dir}/image_comparisons", exist_ok=True)
+        plt.savefig(f"{base_dir}/image_comparisons/{index}.png", dpi=400)
+        plt.close()
+
+    # Plot the mean change in pixels for successful attacks by model and pixel count in a heatmap of the most changed pixel where each image is (32,32,3)
+    plt.figure(figsize=(10, 5))
+    data = pd.DataFrame(baseline[baseline["success"]])
+    sns.heatmap(data.groupby(["model", "pixels"])["diff_image"].mean().apply(lambda x: x.max()).unstack())
+    plt.savefig(f"{base_dir}/pixel_heatmap.png", dpi=400)
+    plt.close()
 
 
 def find_overlap_images(configs: List[Tuple[str, str]]):
@@ -36,6 +161,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Analysis Options")
     parser.add_argument("--dev", action="store_true", help="Development Mode")
     parser.add_argument("--images", action="store_true", help="Save Image Pairs")
+    parser.add_argument("--rqs", action="store_true", help="Run RQ4 Analysis")
     args = parser.parse_args()
 
     configs = [
@@ -95,43 +221,8 @@ if __name__ == "__main__":
         plt.savefig(f"{base_dir}/barplot.png", dpi=400)
         plt.close()
 
-
-        # Plot the mean change in pixels for successful attacks by model and pixel count in a heatmap of the most changed pixel where each image is (32,32,3)
-        plt.figure(figsize=(10, 5))
-        data = pd.DataFrame(baseline[baseline["success"]])
-
-        sns.heatmap(data.groupby(["model", "pixels"])["diff_image"].mean().apply(lambda x: x.max()).unstack())
-        plt.savefig(f"{base_dir}/pixel_heatmap.png", dpi=400)
-        plt.close()
-
-        if args.dev:
-            data_generator = baseline.groupby(
-                [
-                    "model",
-                    "pixels",
-                    "success",
-                ]
-            )
-            for (model, pixel_count, success), value in data_generator["diff_image"]:  # type: ignore
-                os.makedirs(f"{base_dir}/average_maximum_changes", exist_ok=True)
-                average_changes = np.array(value.abs().mean()).max(axis=2)  # Average over the 3 channels
-                average_changes = np.log(abs(average_changes) + 1)
-        
-                plt.figure(figsize=(6, 5))
-                sns.heatmap(
-                    average_changes,
-                    cmap="coolwarm",
-                    cbar_kws={"label": "Mean Maximum Absolute Change (0-255)"},
-                )
-                plt.title(f"Model: {model}, Pixels: {pixel_count}")
-                plt.xlabel("Width")
-                plt.ylabel("Height")
-                plt.xticks([])
-                plt.yticks([])
-                plt.tight_layout()
-                worked_label = "successful" if success else "unsuccessful"
-                plt.savefig(f"{base_dir}/average_maximum_changes/{worked_label}_{model}_{pixel_count}.png", dpi=400)
-                plt.close()
+        if args.rqs:
+            rqs(baseline, base_dir)
 
         if args.images:
             images = [baseline[baseline["success"]].index[0]]
@@ -214,7 +305,25 @@ if __name__ == "__main__":
 
 
     # Compare the minimize change results
-    baseline = pd.read_pickle("results/minimize_change_resnet.pkl")
+    # baseline = pd.read_pickle("results/minimize_change_resnet.pkl")
+    baseline = pd.read_pickle("results/minimize_local_resnet_small.pkl")
+    columns = pd.Index(
+        [
+            "model",
+            "attack_image",
+            "original_image",
+            "pixels",
+            "image",
+            "true",
+            "predicted",
+            "success",
+            "cdiff",
+            "prior_probs",
+            "predicted_probs",
+            "perturbation",
+        ]
+    )
+    baseline = pd.DataFrame(baseline, columns=columns)
     baseline = baseline[baseline["model"] == "resnet"]
     baseline = baseline[baseline["success"]]
 
@@ -298,3 +407,4 @@ if __name__ == "__main__":
 
 
     print('Pause')
+
