@@ -211,3 +211,90 @@ if __name__ == "__main__":
     plt.xticks(rotation=0)
     plt.tight_layout()
     plt.savefig(f"results/defense_barplot.png", dpi=400)
+
+
+    # Compare the minimize change results
+    baseline = pd.read_pickle("results/minimize_change_resnet.pkl")
+    baseline = baseline[baseline["model"] == "resnet"]
+    baseline = baseline[baseline["success"]]
+
+    patch_size = 3  # Size of the patch to be used  nxn, can also be 5x5 or 7x7
+    minus = patch_size // 2
+    plus = patch_size - minus
+    changes = []
+    diffs = []
+    for original, attack_image in zip(baseline["original_image"].values, baseline["attack_image"].values):
+        diff = np.abs(original - attack_image)
+        diff = np.pad(diff, ((minus, minus), (minus, minus), (0, 0)), mode='constant')  # Handle borders [9]
+        y_list, x_list = np.array(np.argwhere(diff)[:, :2][::3]).T
+
+        differences_from_patch = []
+        for y, x in zip(y_list, x_list):
+            patch = np.array(attack_image[y - minus:y + plus, x - minus:x + plus, :])
+            if patch.shape != (patch_size, patch_size, 3):
+                continue
+            mask = np.ones_like(patch, dtype=bool)
+            mask[minus, minus, :] = False
+            masked_patch = np.where(mask, patch, np.nan)
+            avg = np.nanmean(masked_patch, axis=(0, 1))
+
+            # Euclidean dist from original
+            dist = np.linalg.norm(avg - patch[minus, minus, :])
+            differences_from_patch.append(dist)
+
+        # Normalize change to the size of the pixel (0-255)
+        change = np.array(differences_from_patch) / 255
+        changes.append(np.mean(change))
+        diffs.append(diff)
+
+    changes = np.array(changes)
+    diffs = np.array(diffs)
+
+    mean_diffs = np.mean(diffs, axis=0)
+
+    # Plot mean_diffs as an image (32, 32, 3)
+    plt.figure(figsize=(5, 5))
+    plt.imshow(mean_diffs)
+    plt.axis("off")
+    plt.title("Mean Change in Pixels Across RGB Channels")
+    plt.tight_layout()
+    plt.savefig(f"results/minimize_change_resnet_mean_diff.png", dpi=400)
+    plt.close()
+
+    # Plot histogram of changes
+    plt.figure(figsize=(8, 5))
+    plt.hist(changes * 255, bins=50)
+    plt.xlabel("Euclidean Distance From Surrounding 3x3 Pixel Cluster Mean (0-255)")
+    plt.ylabel("Frequency (50 Bins)")
+    plt.tight_layout()
+    plt.savefig(f"results/minimize_change_resnet_histogram.png", dpi=400)
+    plt.close()
+
+    # Plot an example diff image
+    before = baseline["original_image"].values[0]
+    after = baseline["attack_image"].values[0]
+    diff = np.abs(before - after)
+
+    # Plot the before and after images
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    axs[0].imshow(before)
+    axs[0].set_title("Original Image")
+    axs[1].imshow(after)
+    axs[1].set_title("Attack Image")
+    axs[0].axis("off")
+    axs[1].axis("off")
+    plt.tight_layout()
+    plt.savefig(f"results/minimize_change_resnet_example.png", dpi=400)
+    plt.close()
+
+    # Plot the diff image
+    plt.figure(figsize=(5, 5))
+    plt.imshow(diff)
+    plt.axis("off")
+    plt.title("Difference Image")
+    plt.tight_layout()
+    plt.savefig(f"results/minimize_change_resnet_diff_example.png", dpi=400)
+    plt.close()
+
+
+    print('Pause')
